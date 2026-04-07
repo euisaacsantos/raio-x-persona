@@ -34,7 +34,7 @@ export default async function handler(req) {
         'x-api-key': apiKey,
         'anthropic-version': req.headers.get('anthropic-version') || '2023-06-01',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ ...body, stream: true }),
     });
 
     return new Response(response.body, {

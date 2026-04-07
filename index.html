@@ -587,8 +587,6 @@ Quantidades: 5 transformações, 6 dores, 7 vitórias, 4 copies, 5 etapas pitch,
       })
     });
 
-    clearInterval(iv);
-
     if (!resp.ok) {
       const errText = await resp.text().catch(() => '');
       let errMsg = 'Erro ' + resp.status;
@@ -597,22 +595,49 @@ Quantidades: 5 transformações, 6 dores, 7 vitórias, 4 copies, 5 etapas pitch,
       throw new Error(errMsg);
     }
 
-    const data = await resp.json();
-    const stopReason = data.stop_reason;
-    const raw = (data.content || []).map(b => b.text || '').join('');
-    const clean = raw.replace(/```json\n?|```/g, '').trim();
+    // Lê stream SSE da Anthropic e acumula os text_delta
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = '';
+    let stopReason = null;
+    let sseBuffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      sseBuffer += decoder.decode(value, { stream: true });
+      const lines = sseBuffer.split('\n');
+      sseBuffer = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6).trim();
+        if (!payload || payload === '[DONE]') continue;
+        try {
+          const evt = JSON.parse(payload);
+          if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+            accumulated += evt.delta.text;
+          } else if (evt.type === 'message_delta') {
+            stopReason = evt.delta?.stop_reason;
+          }
+        } catch(_) {}
+      }
+    }
+
+    clearInterval(iv);
 
     if (stopReason === 'max_tokens') {
-      console.error('Resposta truncada (max_tokens). Raw parcial:', raw.slice(-200));
-      throw new Error('Resposta truncada pelo limite de tokens. Tente com um arquivo menor.');
+      console.error('Resposta truncada. Últimos 200 chars:', accumulated.slice(-200));
+      throw new Error('Resposta truncada pelo limite de tokens. Use um arquivo menor.');
     }
+
+    const clean = accumulated.replace(/```json\n?|```/g, '').trim();
 
     let parsed;
     try { parsed = JSON.parse(clean); }
     catch(e) {
       console.error('Parse error:', e.message);
-      console.error('Raw (primeiros 500 chars):', raw.slice(0, 500));
-      console.error('Raw (últimos 200 chars):', raw.slice(-200));
+      console.error('Acumulado (primeiros 500):', accumulated.slice(0, 500));
+      console.error('Acumulado (últimos 200):', accumulated.slice(-200));
       throw new Error('JSON inválido: ' + e.message.slice(0, 80));
     }
 
