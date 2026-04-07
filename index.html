@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Namah · Raio X Persona</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FAFAF8; --surface: #FFFFFF; --surface2: #F4F3EF;
+  --border: rgba(0,0,0,0.1); --border-mid: rgba(0,0,0,0.18);
+  --text: #1a1a18; --text-2: #5a5a56; --text-3: #9a9994;
+  --teal: #1D9E75; --teal-bg: #E1F5EE; --teal-text: #0F6E56;
+  --coral: #D85A30; --coral-bg: #FAECE7; --coral-text: #993C1D;
+  --blue: #378ADD; --blue-bg: #E6F1FB; --blue-text: #185FA5;
+  --amber: #BA7517; --amber-bg: #FAEEDA; --amber-text: #854F0B;
+  --purple: #7F77DD; --purple-bg: #EEEDFE; --purple-text: #534AB7;
+  --red-bg: #FCEBEB; --red-text: #A32D2D; --red-border: #E24B4A;
+  --green-bg: #EAF3DE; --green-text: #3B6D11;
+  --radius: 12px; --radius-sm: 8px;
+}
+body { font-family: 'Georgia', serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* TOPBAR */
+.topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; height: 52px; }
+.topbar-brand { display: flex; align-items: center; gap: 10px; }
+.topbar-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--teal); }
+.topbar-name { font-family: 'Georgia', serif; font-size: 15px; color: var(--text); }
+.topbar-tag { font-family: -apple-system, sans-serif; font-size: 11px; color: var(--text-3); letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* NAV TABS */
+.nav-tabs { background: var(--surface); border-bottom: 0.5px solid var(--border); display: flex; overflow-x: auto; padding: 0 1.5rem; position: sticky; top: 52px; z-index: 99; scrollbar-width: none; }
+.nav-tabs::-webkit-scrollbar { display: none; }
+.nav-tab { font-family: -apple-system, sans-serif; font-size: 12px; font-weight: 500; color: var(--text-3); padding: 13px 14px; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; background: none; border-top: none; border-left: none; border-right: none; transition: color 0.15s; }
+.nav-tab:hover { color: var(--text-2); }
+.nav-tab.active { color: var(--teal-text); border-bottom-color: var(--teal); }
+
+/* MAIN */
+.main { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem 6rem; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* COMMON */
+.section-label { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); margin: 2.5rem 0 1rem; }
+.section-label:first-child { margin-top: 0; }
+.card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: var(--radius-sm); border: 0.5px solid var(--border-mid); background: transparent; font-family: -apple-system, sans-serif; font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; transition: background 0.12s, transform 0.1s; }
+.btn:hover { background: var(--surface2); }
+.btn:active { transform: scale(0.98); }
+.btn-teal { background: var(--teal); color: #fff; border-color: var(--teal); }
+.btn-teal:hover { opacity: 0.88; background: var(--teal); }
+.pill { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 500; padding: 3px 11px; border-radius: 20px; border: 0.5px solid; cursor: pointer; background: transparent; }
+.pill-purple { color: var(--purple-text); border-color: var(--purple); }
+.pill-purple:hover { background: var(--purple-bg); }
+.pill-amber { color: var(--amber-text); border-color: var(--amber); }
+.pill-amber:hover { background: var(--amber-bg); }
+.pill-teal { color: var(--teal-text); border-color: var(--teal); }
+.pill-teal:hover { background: var(--teal-bg); }
+.pill-red { color: var(--red-text); border-color: var(--red-border); }
+.pill-red:hover { background: var(--red-bg); }
+.pill-blue { color: var(--blue-text); border-color: var(--blue); }
+.pill-blue:hover { background: var(--blue-bg); }
+.tag { font-family: -apple-system, sans-serif; font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; }
+.tag-coral { background: var(--coral-bg); color: var(--coral-text); }
+.tag-teal { background: var(--teal-bg); color: var(--teal-text); }
+.tag-blue { background: var(--blue-bg); color: var(--blue-text); }
+.tag-amber { background: var(--amber-bg); color: var(--amber-text); }
+.tag-purple { background: var(--purple-bg); color: var(--purple-text); }
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* QUOTE — frase exata da aluna */
+.quote-block { border-left: 3px solid var(--teal); padding: 10px 14px; background: var(--teal-bg); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-bottom: 10px; }
+.quote-block:last-child { margin-bottom: 0; }
+.quote-text { font-family: 'Georgia', serif; font-size: 14px; font-style: italic; color: var(--text); line-height: 1.65; margin-bottom: 5px; }
+.quote-attr { font-family: -apple-system, sans-serif; font-size: 11px; color: var(--text-3); }
+
+/* UPLOAD PAGE */
+.hero { margin-bottom: 2.5rem; }
+.hero-label { font-family: -apple-system, sans-serif; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; }
+.hero-title { font-size: 30px; font-weight: normal; line-height: 1.25; margin-bottom: 10px; }
+.hero-title em { font-style: italic; color: var(--teal); }
+.hero-sub { font-family: -apple-system, sans-serif; font-size: 14px; color: var(--text-2); line-height: 1.65; max-width: 560px; }
+.howto { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+.howto-title { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); margin-bottom: 10px; }
+.howto-steps { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.howto-step { display: flex; align-items: flex-start; gap: 8px; }
+.step-num { width: 20px; height: 20px; border-radius: 50%; background: var(--teal-bg); color: var(--teal-text); font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.step-text { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text-2); line-height: 1.5; }
+.api-section { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+.api-label { font-family: -apple-system, sans-serif; font-size: 12px; color: var(--text-3); margin-bottom: 8px; }
+.api-row { display: flex; gap: 8px; }
+.api-input { flex: 1; padding: 9px 14px; border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm); font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text); background: var(--bg); outline: none; }
+.api-input:focus { border-color: var(--teal); }
+.api-note { font-family: -apple-system, sans-serif; font-size: 11px; color: var(--text-3); margin-top: 6px; }
+.upload-zone { border: 1.5px dashed var(--border-mid); border-radius: var(--radius); padding: 3rem 2rem; text-align: center; cursor: pointer; transition: background 0.15s, border-color 0.15s; margin-bottom: 1rem; background: var(--surface); }
+.upload-zone:hover { background: var(--surface2); border-color: var(--teal); }
+.upload-zone.dragover { background: var(--teal-bg); border-color: var(--teal); }
+.upload-icon { font-size: 36px; margin-bottom: 14px; }
+.upload-title { font-family: -apple-system, sans-serif; font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+.upload-hint { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text-3); }
+#file-input { display: none; }
+.or-row { text-align: center; margin: 1rem 0; font-family: -apple-system, sans-serif; font-size: 12px; color: var(--text-3); }
+.btn-center { display: flex; justify-content: center; }
+
+/* LOADING */
+#state-loading { display: none; text-align: center; padding: 6rem 2rem; }
+.spinner { width: 36px; height: 36px; border: 2px solid var(--border); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.75s linear infinite; margin: 0 auto 1.25rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-family: -apple-system, sans-serif; font-size: 14px; color: var(--text-2); }
+
+/* RESULTS HEADER */
+.results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+.results-title { font-size: 22px; color: var(--text); }
+.results-title em { font-style: italic; color: var(--teal); }
+
+/* METRICS */
+.metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.metric { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px 18px; }
+.metric-label { font-family: -apple-system, sans-serif; font-size: 12px; color: var(--text-3); margin-bottom: 6px; }
+.metric-value { font-size: 26px; color: var(--text); }
+.metric-value.small { font-size: 14px; font-family: -apple-system, sans-serif; font-weight: 500; padding-top: 4px; }
+
+/* BARS */
+.bar-item { margin-bottom: 14px; }
+.bar-item:last-child { margin-bottom: 0; }
+.bar-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.bar-label { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text); }
+.bar-pct { font-family: -apple-system, sans-serif; font-size: 12px; font-weight: 600; color: var(--teal-text); }
+.bar-track { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; background: var(--teal); transition: width 1s ease; width: 0; }
+
+/* COPY */
+.copy-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; }
+.copy-card:last-child { margin-bottom: 0; }
+.copy-header { padding: 10px 16px; background: var(--purple-bg); border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.copy-type { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--purple-text); }
+.copy-body { padding: 16px; }
+.copy-quote { font-family: 'Georgia', serif; font-size: 13px; font-style: italic; color: var(--text-2); border-left: 2px solid var(--purple); padding-left: 12px; margin-bottom: 12px; line-height: 1.6; }
+.copy-text { font-family: -apple-system, sans-serif; font-size: 14px; color: var(--text); line-height: 1.7; }
+
+/* PITCH */
+.pitch-block { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 0.5px solid var(--border); }
+.pitch-block:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.pitch-step { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--teal-text); margin-bottom: 8px; }
+.pitch-text { font-family: 'Georgia', serif; font-size: 15px; line-height: 1.8; color: var(--text); }
+
+/* PROVOCATIONS */
+.prov-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; }
+.prov-card:last-child { margin-bottom: 0; }
+.prov-header { padding: 10px 16px; background: var(--amber-bg); border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.prov-topic { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--amber-text); }
+.prov-body { padding: 16px; }
+.prov-msg { font-family: -apple-system, sans-serif; font-size: 14px; color: var(--text); line-height: 1.75; }
+
+/* STRATEGIC */
+.strategic-item { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; }
+.strategic-label { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 8px; }
+.strategic-text { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text); line-height: 1.6; }
+.strategic-main { background: var(--surface); border: 0.5px solid var(--border); border-left: 3px solid var(--teal); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 18px 20px; margin-top: 12px; }
+.strategic-main p { font-family: 'Georgia', serif; font-size: 15px; line-height: 1.85; color: var(--text); }
+
+/* ===== NEW MODULES ===== */
+
+/* MOMENTO DA ALUNA */
+.momento-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 14px; }
+.momento-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.5px solid var(--border); }
+.momento-badge { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 10px; border-radius: 20px; }
+.badge-negacao { background: var(--red-bg); color: var(--red-text); }
+.badge-dor { background: var(--coral-bg); color: var(--coral-text); }
+.badge-tentativa { background: var(--amber-bg); color: var(--amber-text); }
+.badge-travada { background: var(--purple-bg); color: var(--purple-text); }
+.badge-evolucao { background: var(--blue-bg); color: var(--blue-text); }
+.badge-virada { background: var(--teal-bg); color: var(--teal-text); }
+.momento-body { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.momento-section { }
+.momento-section-title { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 8px; }
+.momento-desc { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 10px; }
+.momento-action { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text); line-height: 1.6; }
+.momento-count { font-family: -apple-system, sans-serif; font-size: 12px; color: var(--text-3); }
+
+/* PUXADAS */
+.puxada-block { margin-bottom: 20px; }
+.puxada-tema { font-family: -apple-system, sans-serif; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); margin-bottom: 10px; }
+.puxada-item { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.puxada-text { font-family: -apple-system, sans-serif; font-size: 14px; color: var(--text); line-height: 1.6; flex: 1; }
+.puxada-item.impacto { border-left: 3px solid var(--purple); background: var(--purple-bg); }
+.puxada-item.impacto .puxada-text { font-family: 'Georgia', serif; font-style: italic; }
+.interacao-item { background: var(--amber-bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px; }
+.interacao-text { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text); line-height: 1.6; }
+
+/* RISCO */
+.risco-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; }
+.risco-header { padding: 10px 16px; background: var(--red-bg); border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.risco-name { font-family: -apple-system, sans-serif; font-size: 13px; font-weight: 600; color: var(--red-text); }
+.risco-body { padding: 16px; }
+.risco-signal { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 10px; }
+.risco-msg { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text); background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; line-height: 1.7; border-left: 2px solid var(--red-border); }
+
+/* CS PREMIUM */
+.cs-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; }
+.cs-header { padding: 10px 16px; background: var(--green-bg); border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.cs-tipo { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--green-text); }
+.cs-body { padding: 16px; }
+.cs-objetivo { font-family: -apple-system, sans-serif; font-size: 12px; color: var(--text-3); margin-bottom: 8px; }
+.cs-aplicar { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text); line-height: 1.65; margin-bottom: 10px; }
+.cs-intro { font-family: 'Georgia', serif; font-size: 14px; font-style: italic; color: var(--text-2); border-left: 2px solid var(--teal); padding-left: 12px; line-height: 1.65; }
+
+/* AUTORIDADE */
+.autoridade-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 14px; }
+.autoridade-header { padding: 10px 16px; background: var(--blue-bg); border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.autoridade-label { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--blue-text); }
+.autoridade-body { padding: 16px; }
+.autoridade-quote { font-family: 'Georgia', serif; font-size: 16px; font-style: italic; color: var(--text); line-height: 1.65; border-left: 3px solid var(--blue); padding-left: 14px; margin-bottom: 10px; }
+.autoridade-attr { font-family: -apple-system, sans-serif; font-size: 12px; color: var(--text-3); margin-bottom: 12px; padding-left: 17px; }
+.autoridade-poder { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 12px; }
+.uso-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.uso-tag { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; background: var(--blue-bg); color: var(--blue-text); }
+
+/* CAÇA-PRINTS */
+.print-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; }
+.print-num { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; color: var(--text-3); padding: 10px 16px; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface2); }
+.print-body { padding: 16px; }
+.print-frase { font-family: 'Georgia', serif; font-size: 16px; font-style: italic; color: var(--text); line-height: 1.65; margin-bottom: 8px; }
+.print-attr { font-family: -apple-system, sans-serif; font-size: 12px; color: var(--text-3); margin-bottom: 12px; }
+.print-legenda-label { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 6px; }
+.print-legenda { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text-2); line-height: 1.65; background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; }
+
+.toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--surface); font-family: -apple-system, sans-serif; font-size: 13px; padding: 10px 20px; border-radius: 20px; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 999; }
+.toast.show { opacity: 1; }
+.reset-row { margin-top: 2.5rem; text-align: center; }
+.tab-intro { background: var(--surface2); border-radius: var(--radius-sm); padding: 14px 18px; margin-bottom: 1.75rem; display: flex; gap: 12px; align-items: flex-start; }
+.tab-intro-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.tab-intro-text { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--text-2); line-height: 1.65; }
+.tab-intro-text strong { color: var(--text); font-weight: 600; }
+
+@media (max-width: 640px) {
+  .metrics, .two-col, .three-col { grid-template-columns: 1fr; }
+  .momento-body { grid-template-columns: 1fr; }
+  .howto-steps { flex-direction: column; gap: 10px; }
+  .hero-title { font-size: 24px; }
+  .main { padding: 2rem 1.25rem 4rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-dot"></div>
+    <span class="topbar-name">Namah</span>
+  </div>
+  <span class="topbar-tag">Raio X Persona</span>
+</div>
+
+<!-- NAV TABS (hidden until results) -->
+<div class="nav-tabs" id="nav-tabs" style="display:none;">
+  <button class="nav-tab active" onclick="showTab('tab-overview')">Visão Geral</button>
+  <button class="nav-tab" onclick="showTab('tab-copy')">Copy & Pitch</button>
+  <button class="nav-tab" onclick="showTab('tab-provocacao')">Provocações</button>
+  <button class="nav-tab" onclick="showTab('tab-momento')">Motor de Momento</button>
+  <button class="nav-tab" onclick="showTab('tab-puxadas')">Puxadas de Engajamento</button>
+  <button class="nav-tab" onclick="showTab('tab-risco')">Detector de Risco</button>
+  <button class="nav-tab" onclick="showTab('tab-cs')">CS Premium</button>
+  <button class="nav-tab" onclick="showTab('tab-autoridade')">Motor de Autoridade</button>
+  <button class="nav-tab" onclick="showTab('tab-prints')">Caça-Prints</button>
+</div>
+
+<div class="main">
+
+  <!-- ===== UPLOAD STATE ===== -->
+  <div id="state-upload">
+    <div class="hero">
+      <div class="hero-label">Namah · Raio X Persona</div>
+      <h1 class="hero-title">Suba uma conversa e receba<br>seu <em>Raio X completo</em></h1>
+      <p class="hero-sub">Carregue qualquer conversa exportada do WhatsApp — grupo ou individual — e receba copy pronta, pitch, provocações, análise emocional, detecção de risco e os melhores prints baseados nas falas reais.</p>
+    </div>
+    <div class="howto">
+      <div class="howto-title">Como exportar o grupo do WhatsApp</div>
+      <div class="howto-steps">
+        <div class="howto-step"><div class="step-num">1</div><div class="step-text">Abra o grupo de alunas no WhatsApp</div></div>
+        <div class="howto-step"><div class="step-num">2</div><div class="step-text">Toque nos 3 pontinhos → "Exportar conversa"</div></div>
+        <div class="howto-step"><div class="step-num">3</div><div class="step-text">Escolha "Sem mídia"</div></div>
+        <div class="howto-step"><div class="step-num">4</div><div class="step-text">Compartilhe o arquivo .txt aqui</div></div>
+      </div>
+    </div>
+    <div class="api-section" style="border:1px solid var(--teal);">
+      <div class="api-label" style="color:var(--teal-text);font-weight:600;">🔑 Chave da API Anthropic</div>
+      <div class="api-row">
+        <input type="password" class="api-input" id="api-key" placeholder="sk-ant-..." onkeydown="if(event.key='Enter') saveKey()" />
+        <button class="btn btn-teal" onclick="saveKey()">Salvar</button>
+      </div>
+      <div class="api-note">Cole sua chave e clique em Salvar. Ela fica guardada só neste navegador. Crie em <strong>console.anthropic.com</strong> → API Keys.</div>
+    </div>
+    <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">📂</div>
+      <div class="upload-title">Arraste o arquivo .txt ou clique para selecionar</div>
+      <div class="upload-hint">Exportação do WhatsApp · formato .txt · sem mídia</div>
+    </div>
+    <input type="file" id="file-input" accept=".txt,.text,text/plain">
+    <button id="btn-analisar" onclick="iniciarAnalise()" style="display:none;width:100%;margin-top:1rem;padding:14px;background:var(--teal);color:#fff;border:none;border-radius:var(--radius-sm);font-family:-apple-system,sans-serif;font-size:15px;font-weight:500;cursor:pointer;">
+      Analisar conversa →
+    </button>
+  </div>
+
+  <!-- ===== LOADING STATE ===== -->
+  <div id="state-loading">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loading-text">Lendo os depoimentos...</div>
+  </div>
+
+  <!-- ===== RESULTS STATE ===== -->
+  <div id="state-results" style="display:none;">
+
+    <!-- TAB: VISÃO GERAL -->
+    <div class="panel active" id="tab-overview">
+      <div class="results-header">
+        <h2 class="results-title">Inteligência da sua <em>persona</em></h2>
+        <button class="btn" onclick="resetApp()">← Novo arquivo</button>
+      </div>
+      <div class="tab-intro">
+        <div class="tab-intro-icon">📊</div>
+        <div class="tab-intro-text"><strong>O que você vai encontrar aqui:</strong> um raio-x do grupo — quantas alunas falaram, quais transformações aparecem com mais frequência, as palavras exatas que elas usam para descrever dores e vitórias, e o insight principal para guiar o próximo lançamento. Use como ponto de partida antes de mergulhar nas outras abas.</div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">Depoimentos analisados</div><div class="metric-value" id="m-total">—</div></div>
+        <div class="metric"><div class="metric-label">Participantes</div><div class="metric-value" id="m-pessoas">—</div></div>
+        <div class="metric"><div class="metric-label">Tema dominante</div><div class="metric-value small" id="m-tema">—</div></div>
+      </div>
+      <div class="section-label">Transformações mais relatadas</div>
+      <div class="card"><div id="bars-container"></div></div>
+      <div class="section-label">Linguagem real da persona</div>
+      <div class="two-col">
+        <div class="card">
+          <div style="font-family:-apple-system,sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--coral-text);margin-bottom:12px;display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--coral);display:inline-block;"></span>Dores antes do Ascenda</div>
+          <div class="tag-list" id="tags-dores"></div>
+        </div>
+        <div class="card">
+          <div style="font-family:-apple-system,sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--teal-text);margin-bottom:12px;display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block;"></span>Vitórias relatadas</div>
+          <div class="tag-list" id="tags-vitorias"></div>
+        </div>
+      </div>
+      <div class="section-label">Insight estratégico para o próximo lançamento</div>
+      <div class="two-col" id="strategic-grid"></div>
+      <div class="strategic-main"><p id="strategic-main-text"></p></div>
+      <div class="reset-row"><button class="btn" onclick="resetApp()">← Analisar outro arquivo</button></div>
+    </div>
+
+    <!-- TAB: COPY & PITCH -->
+    <div class="panel" id="tab-copy">
+      <div class="tab-intro">
+        <div class="tab-intro-icon">✍️</div>
+        <div class="tab-intro-text"><strong>O que você vai encontrar aqui:</strong> textos prontos para usar, escritos na linguagem real das suas alunas. Cada copy já vem no formato certo — headline, story, anúncio ou email — com a frase original da aluna que inspirou. O pitch completo está estruturado em 5 etapas e pode ser copiado inteiro com um clique.</div>
+      </div>
+      <div class="section-label" style="margin-top:0;">Copy pronta para usar</div>
+      <div id="copy-container"></div>
+      <div class="section-label">Pitch personalizado para o próximo lançamento</div>
+      <div class="card" style="position:relative;">
+        <button class="pill pill-teal" style="position:absolute;top:1.25rem;right:1.5rem;" onclick="copyPitch()">Copiar pitch completo</button>
+        <div id="pitch-container"></div>
+      </div>
+    </div>
+
+    <!-- TAB: PROVOCAÇÕES -->
+    <div class="panel" id="tab-provocacao">
+      <div class="tab-intro">
+        <div class="tab-intro-icon">💬</div>
+        <div class="tab-intro-text"><strong>O que você vai encontrar aqui:</strong> mensagens prontas para enviar no grupo, criadas a partir dos temas mais presentes nos depoimentos. Cada uma foi escrita para gerar reflexão e resposta — não engajamento superficial. É só copiar e colar.</div>
+      </div>
+      <div class="section-label" style="margin-top:0;">Mensagens de provocação para o grupo</div>
+      <div id="prov-container"></div>
+    </div>
+
+    <!-- TAB: MOTOR DE MOMENTO -->
+    <div class="panel" id="tab-momento">
+      <div class="tab-intro">
+        <div class="tab-intro-icon">🧭</div>
+        <div class="tab-intro-text"><strong>O que você vai encontrar aqui:</strong> cada aluna classificada em um momento emocional — negação, dor consciente, tentativa, travada, evolução ou virada de chave. Para cada estado: exemplos reais com nome e data, o que essa aluna precisa agora, como responder no grupo e qual tipo de conteúdo direcionar. Útil para personalizar a comunicação e não tratar o grupo como bloco único.</div>
+      </div>
+      <div class="section-label" style="margin-top:0;">Classificação emocional das alunas</div>
+      <div id="momento-container"></div>
+    </div>
+
+    <!-- TAB: PUXADAS DE ENGAJAMENTO -->
+    <div class="panel" id="tab-puxadas">
+      <div class="tab-intro">
+        <div class="tab-intro-icon">🔥</div>
+        <div class="tab-intro-text"><strong>O que você vai encontrar aqui:</strong> material para manter o grupo vivo entre os conteúdos principais. Perguntas que geram resposta real, frases de impacto para postar e ideias de interação coletiva — tudo baseado nos temas que já aparecem nas falas das alunas. Funciona para stories, feed e direto no grupo.</div>
+      </div>
+      <div class="section-label" style="margin-top:0;">Perguntas provocativas</div>
+      <div id="puxadas-perguntas"></div>
+      <div class="section-label">Frases de impacto</div>
+      <div id="puxadas-frases"></div>
+      <div class="section-label">Ideias de interação no grupo</div>
+      <div id="puxadas-interacoes"></div>
+    </div>
+
+    <!-- TAB: DETECTOR DE RISCO -->
+    <div class="panel" id="tab-risco">
+      <div class="tab-intro">
+        <div class="tab-intro-icon">⚠️</div>
+        <div class="tab-intro-text"><strong>O que você vai encontrar aqui:</strong> alunas com sinais de desengajamento — queda de participação, respostas superficiais ou mudança de tom. Para cada uma: o que indica o risco, como abordar sem pressionar e uma mensagem pronta para reengajar. Agir cedo evita perda silenciosa de aluna.</div>
+      </div>
+      <div class="section-label" style="margin-top:0;">Alunas em possível desengajamento</div>
+      <div id="risco-container"></div>
+    </div>
+
+    <!-- TAB: CS PREMIUM -->
+    <div class="panel" id="tab-cs">
+      <div class="tab-intro">
+        <div class="tab-intro-icon">💎</div>
+        <div class="tab-intro-text"><strong>O que você vai encontrar aqui:</strong> sugestões práticas para elevar a experiência dentro do programa — desafios semanais, reflexões guiadas e exercícios prontos para aplicar no grupo. Cada sugestão vem com objetivo emocional, como implementar e a introdução já escrita para você postar.</div>
+      </div>
+      <div class="section-label" style="margin-top:0;">Sugestões para melhorar a experiência das alunas</div>
+      <div id="cs-container"></div>
+    </div>
+
+    <!-- TAB: MOTOR DE AUTORIDADE -->
+    <div class="panel" id="tab-autoridade">
+      <div class="tab-intro">
+        <div class="tab-intro-icon">⭐</div>
+        <div class="tab-intro-text"><strong>O que você vai encontrar aqui:</strong> os depoimentos com maior poder emocional do grupo — selecionados pela intensidade, não só pelo resultado. Cada um vem com a frase exata, nome e data, o contexto de antes e depois, por que é poderoso e como usar: em anúncio, página de vendas, story ou como prova social.</div>
+      </div>
+      <div class="section-label" style="margin-top:0;">Depoimentos com alto poder emocional</div>
+      <div id="autoridade-container"></div>
+    </div>
+
+    <!-- TAB: CAÇA-PRINTS -->
+    <div class="panel" id="tab-prints">
+      <div class="tab-intro">
+        <div class="tab-intro-icon">📸</div>
+        <div class="tab-intro-text"><strong>O que você vai encontrar aqui:</strong> os 15 melhores momentos do grupo para virar print e publicar. Cada um tem a frase exata com nome e data — prontos para printar e usar como prova social — e uma legenda sugerida para o Instagram. Copie tudo com um clique.</div>
+      </div>
+      <div class="section-label" style="margin-top:0;">Top 15 melhores prints do grupo</div>
+      <div id="prints-container"></div>
+    </div>
+
+  </div><!-- /state-results -->
+</div><!-- /main -->
+
+<div class="toast" id="toast">Copiado!</div>
+
+<script>
+// ======================== APP LOGIC ========================
+let currentPitch = [];
+
+let _apiKey = '';
+
+function saveKey() {
+  const k = document.getElementById('api-key').value.trim();
+  if (!k) {
+    showToast('Cole sua chave no campo primeiro.');
+    return;
+  }
+  _apiKey = k;
+  try { localStorage.setItem('namah_key', k); } catch(e) {}
+  showToast('Chave salva! Agora suba seu arquivo.');
+}
+
+function getKey() {
+  if (_apiKey) return _apiKey;
+  const fromField = (document.getElementById('api-key') || {}).value || '';
+  if (fromField.trim()) return fromField.trim();
+  try { return localStorage.getItem('namah_key') || ''; } catch(e) { return ''; }
+}
+
+window.addEventListener('load', () => {
+  try {
+    const k = localStorage.getItem('namah_key');
+    if (k) { _apiKey = k; document.getElementById('api-key').value = k; }
+  } catch(e) {}
+});
+
+let _textoCarregado = '';
+
+function handleFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    _textoCarregado = e.target.result;
+    // Mostra nome do arquivo no drop zone
+    const dz = document.getElementById('drop-zone');
+    dz.querySelector('.upload-title').textContent = '✓ ' + file.name;
+    dz.querySelector('.upload-hint').textContent = Math.round(file.size / 1024) + ' KB carregados — clique em Analisar para continuar';
+    dz.style.borderColor = 'var(--teal)';
+    // Mostra botão de analisar
+    document.getElementById('btn-analisar').style.display = 'block';
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+function iniciarAnalise() {
+  const key = getKey();
+  if (!key) {
+    showToast('Salve sua chave da API primeiro.');
+    document.getElementById('api-key').focus();
+    return;
+  }
+  if (!_textoCarregado) {
+    showToast('Suba um arquivo primeiro.');
+    return;
+  }
+  showLoading();
+  analyzeText(_textoCarregado);
+}
+
+async function analyzeText(text) {
+  const key = getKey();
+  if (!key) {
+    document.getElementById('state-loading').style.display = 'none';
+    document.getElementById('state-upload').style.display = 'block';
+    document.getElementById('nav-tabs').style.display = 'none';
+    showToast('Salve sua chave da API primeiro.');
+    document.getElementById('api-key').focus();
+    return;
+  }
+
+  const steps = ["Lendo a conversa...","Identificando padrões...","Classificando momentos emocionais...","Construindo copy e pitch...","Gerando provocações e puxadas...","Detectando riscos...","Selecionando melhores prints..."];
+  let si = 0;
+  const iv = setInterval(() => { si++; if (si < steps.length) document.getElementById('loading-text').textContent = steps[si]; }, 2500);
+
+  // Amostragem inteligente para arquivos grandes
+  function amostrar(t) {
+    if (t.length <= 20000) return t;
+    const chunk = 6500;
+    const mid = Math.floor(t.length / 2);
+    return t.slice(0, chunk) + '\n\n[...trecho central...]\n\n' + t.slice(mid - chunk/2, mid + chunk/2) + '\n\n[...trecho final...]\n\n' + t.slice(-chunk);
+  }
+
+  try {
+    const resp = await fetch("/api/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 8000,
+        messages: [{
+          role: "user",
+          content: `Você é especialista em análise de persona, copywriting e lançamentos digitais. Analise esta conversa exportada do WhatsApp.
+
+REGRA CRÍTICA: Use APENAS dados reais do arquivo. Frase EXATA + nome real + data real para cada exemplo. Não invente dados.
+
+Responda APENAS com JSON válido, sem texto adicional, sem markdown, sem crases.
+
+ARQUIVO:
+${amostrar(text)}
+
+Retorne exatamente este JSON (todos os campos obrigatórios):
+{
+  "total": <número de mensagens relevantes>,
+  "pessoas": <número de participantes distintos>,
+  "tema": <tema dominante 1-2 palavras baseado no conteúdo real>,
+  "transformacoes": [{"label": "transformação real citada", "pct": number}],
+  "dores": ["expressão real extraída do texto"],
+  "vitorias": ["resultado real relatado no texto"],
+  "copies": [{"tipo": string, "origem": "frase real do texto entre aspas", "copy": "copy baseada nessa frase real"}],
+  "pitch": [{"etapa": string, "texto": "pitch baseado nas dores e vitórias reais"}],
+  "provocacoes": [{"tema": "tema real do grupo", "mensagem": "mensagem baseada nos temas reais"}],
+  "strategic": {"items": [{"label": string, "texto": "insight baseado nos dados reais"}], "principal": "análise baseada nos padrões reais"},
+  "momentos": [
+    {
+      "tipo": "virada|evolucao|travada|dor|tentativa|negacao",
+      "badge": "badge-virada|badge-evolucao|badge-travada|badge-dor|badge-tentativa|badge-negacao",
+      "label": string,
+      "count": string,
+      "desc": string,
+      "exemplos": [{"frase": "frase EXATA do texto", "nome": "nome real", "data": "data real"}],
+      "precisa": string,
+      "resposta": string,
+      "conteudo": string
+    }
+  ],
+  "puxadas": {
+    "perguntas": [{"texto": "pergunta baseada nos temas reais", "origem": string}],
+    "frases": [{"texto": "frase na linguagem real do grupo", "origem": string}],
+    "interacoes": [{"texto": string}]
+  },
+  "riscos": [{"nome": "nome real ou padrão real", "sinal": "sinal real observado", "abordagem": string, "mensagem": string}],
+  "cs": [{"tipo": string, "objetivo": string, "aplicar": string, "intro": string}],
+  "autoridade": [{"frase": "frase EXATA do texto", "nome": "nome real", "data": "data real", "contexto": string, "poder": string, "usos": [string]}],
+  "prints": [{"frase": "frase EXATA do texto", "nome": "nome real", "data": "data real", "legenda": string}]
+}
+
+Quantidades: 5 transformações, 6 dores, 7 vitórias, 4 copies, 5 etapas pitch, 5 provocações, 4 strategic items, 6 momentos emocionais (2 exemplos reais cada), 5 perguntas, 5 frases impacto, 3 interações, 2-3 riscos, 4 sugestões CS, 4+ autoridade, 10-15 prints. Tudo com dados REAIS do arquivo.`
+        }]
+      })
+    });
+
+    clearInterval(iv);
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'Erro ' + resp.status);
+    }
+
+    const data = await resp.json();
+    const raw = (data.content || []).map(b => b.text || '').join('');
+    const clean = raw.replace(/```json|```/g, '').trim();
+
+    let parsed;
+    try { parsed = JSON.parse(clean); }
+    catch(e) {
+      console.error('Parse error:', e);
+      console.error('Raw:', raw.slice(0, 300));
+      throw new Error('Resposta da IA inválida. Tente novamente — arquivos muito curtos podem causar isso.');
+    }
+
+    renderResults(parsed);
+
+  } catch(e) {
+    clearInterval(iv);
+    document.getElementById('state-loading').style.display = 'none';
+    document.getElementById('state-upload').style.display = 'block';
+    document.getElementById('nav-tabs').style.display = 'none';
+    showToast('Erro: ' + e.message.slice(0, 60));
+console.error('Erro completo:', e.message);
+  }
+}
+
+function showLoading() {
+  document.getElementById('state-upload').style.display = 'none';
+  document.getElementById('state-loading').style.display = 'block';
+  document.getElementById('state-results').style.display = 'none';
+  document.getElementById('nav-tabs').style.display = 'none';
+}
+
+// ======================== RENDER ========================
+function renderResults(d) {
+  document.getElementById('state-loading').style.display = 'none';
+  document.getElementById('state-results').style.display = 'block';
+  document.getElementById('nav-tabs').style.display = 'flex';
+
+  // OVERVIEW
+  document.getElementById('m-total').textContent = d.total;
+  document.getElementById('m-pessoas').textContent = d.pessoas;
+  document.getElementById('m-tema').textContent = d.tema;
+
+  document.getElementById('bars-container').innerHTML = (d.transformacoes||[]).map(t => `
+    <div class="bar-item">
+      <div class="bar-meta"><span class="bar-label">${t.label}</span><span class="bar-pct">${t.pct}%</span></div>
+      <div class="bar-track"><div class="bar-fill" data-pct="${t.pct}"></div></div>
+    </div>`).join('');
+
+  const dC = ['tag-coral','tag-coral','tag-amber','tag-coral','tag-amber','tag-coral'];
+  document.getElementById('tags-dores').innerHTML = (d.dores||[]).map((t,i) => `<span class="tag ${dC[i%6]}">${t}</span>`).join('');
+  const vC = ['tag-teal','tag-teal','tag-blue','tag-teal','tag-teal','tag-purple','tag-blue'];
+  document.getElementById('tags-vitorias').innerHTML = (d.vitorias||[]).map((t,i) => `<span class="tag ${vC[i%7]}">${t}</span>`).join('');
+
+  document.getElementById('strategic-grid').innerHTML = (d.strategic?.items||[]).map(s => `
+    <div class="strategic-item"><div class="strategic-label">${s.label}</div><div class="strategic-text">${s.texto}</div></div>`).join('');
+  document.getElementById('strategic-main-text').textContent = d.strategic?.principal || '';
+
+  // COPY
+  document.getElementById('copy-container').innerHTML = (d.copies||[]).map(c => `
+    <div class="copy-card">
+      <div class="copy-header">
+        <span class="copy-type">${c.tipo}</span>
+        <button class="pill pill-purple" onclick="copyText(${JSON.stringify(c.copy)})">Copiar</button>
+      </div>
+      <div class="copy-body">
+        <div class="copy-quote">${c.origem}</div>
+        <div class="copy-text">${c.copy}</div>
+      </div>
+    </div>`).join('');
+
+  currentPitch = d.pitch || [];
+  document.getElementById('pitch-container').innerHTML = currentPitch.map(p => `
+    <div class="pitch-block">
+      <div class="pitch-step">${p.etapa}</div>
+      <div class="pitch-text">${p.texto}</div>
+    </div>`).join('');
+
+  // PROVOCAÇÕES
+  document.getElementById('prov-container').innerHTML = (d.provocacoes||[]).map(p => `
+    <div class="prov-card">
+      <div class="prov-header">
+        <span class="prov-topic">${p.tema}</span>
+        <button class="pill pill-amber" onclick="copyText(${JSON.stringify(p.mensagem)})">Copiar mensagem</button>
+      </div>
+      <div class="prov-body">
+        <div class="prov-msg">${(p.mensagem||'').replace(/\n/g,'<br>')}</div>
+      </div>
+    </div>`).join('');
+
+  // MOMENTOS
+  document.getElementById('momento-container').innerHTML = (d.momentos||[]).map(m => `
+    <div class="momento-card">
+      <div class="momento-header">
+        <span class="momento-badge ${m.badge}">${m.label}</span>
+        <span class="momento-count">${m.count}</span>
+      </div>
+      <div class="momento-body">
+        <div class="momento-section">
+          <div class="momento-section-title">Estado emocional</div>
+          <div class="momento-desc">${m.desc}</div>
+          <div class="momento-section-title" style="margin-top:10px;">O que essa aluna precisa</div>
+          <div class="momento-action">${m.precisa}</div>
+        </div>
+        <div class="momento-section">
+          <div class="momento-section-title">Exemplos reais</div>
+          ${(m.exemplos||[]).map(e => `
+            <div class="quote-block">
+              <div class="quote-text">"${e.frase}"</div>
+              <div class="quote-attr">— ${e.nome} | ${e.data}</div>
+            </div>`).join('')}
+          <div class="momento-section-title" style="margin-top:12px;">Como responder no grupo</div>
+          <div class="momento-action" style="margin-bottom:8px;">${m.resposta}</div>
+          <div class="momento-section-title">Conteúdo ideal</div>
+          <div class="momento-action">${m.conteudo}</div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  // PUXADAS
+  document.getElementById('puxadas-perguntas').innerHTML = (d.puxadas?.perguntas||[]).map(p => `
+    <div class="puxada-item">
+      <div class="puxada-text">${p.texto}</div>
+      <button class="pill pill-blue" onclick="copyText(${JSON.stringify(p.texto)})">Copiar</button>
+    </div>`).join('');
+
+  document.getElementById('puxadas-frases').innerHTML = (d.puxadas?.frases||[]).map(f => `
+    <div class="puxada-item impacto">
+      <div class="puxada-text">${f.texto}</div>
+      <button class="pill pill-purple" onclick="copyText(${JSON.stringify(f.texto)})">Copiar</button>
+    </div>`).join('');
+
+  document.getElementById('puxadas-interacoes').innerHTML = (d.puxadas?.interacoes||[]).map(i => `
+    <div class="interacao-item" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+      <div class="interacao-text">${i.texto}</div>
+      <button class="pill pill-amber" onclick="copyText(${JSON.stringify(i.texto)})">Copiar</button>
+    </div>`).join('');
+
+  // RISCO
+  document.getElementById('risco-container').innerHTML = (d.riscos||[]).map(r => `
+    <div class="risco-card">
+      <div class="risco-header">
+        <span class="risco-name">${r.nome}</span>
+        <button class="pill pill-red" onclick="copyText(${JSON.stringify(r.mensagem)})">Copiar mensagem</button>
+      </div>
+      <div class="risco-body">
+        <div class="risco-signal">${r.sinal}</div>
+        <div style="font-family:-apple-system,sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin:10px 0 6px;">Sugestão de abordagem</div>
+        <div class="risco-signal">${r.abordagem}</div>
+        <div style="font-family:-apple-system,sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin:10px 0 6px;">Mensagem pronta</div>
+        <div class="risco-msg">${(r.mensagem||'').replace(/\n/g,'<br>')}</div>
+      </div>
+    </div>`).join('');
+
+  // CS
+  document.getElementById('cs-container').innerHTML = (d.cs||[]).map(c => `
+    <div class="cs-card">
+      <div class="cs-header">
+        <span class="cs-tipo">${c.tipo}</span>
+        <button class="pill pill-teal" onclick="copyText(${JSON.stringify(c.intro)})">Copiar introdução</button>
+      </div>
+      <div class="cs-body">
+        <div class="cs-objetivo"><strong>Objetivo:</strong> ${c.objetivo}</div>
+        <div style="font-family:-apple-system,sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin:10px 0 6px;">Como aplicar no grupo</div>
+        <div class="cs-aplicar">${c.aplicar}</div>
+        <div style="font-family:-apple-system,sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin:10px 0 6px;">Introdução da atividade</div>
+        <div class="cs-intro">${c.intro}</div>
+      </div>
+    </div>`).join('');
+
+  // AUTORIDADE
+  document.getElementById('autoridade-container').innerHTML = (d.autoridade||[]).map(a => `
+    <div class="autoridade-card">
+      <div class="autoridade-header">
+        <span class="autoridade-label">Depoimento de alto impacto</span>
+        <button class="pill pill-blue" onclick="copyText(${JSON.stringify('"' + a.frase + '"\n— ' + a.nome + ' | ' + a.data)})">Copiar frase</button>
+      </div>
+      <div class="autoridade-body">
+        <div class="autoridade-quote">"${a.frase}"</div>
+        <div class="autoridade-attr">— ${a.nome} | ${a.data}</div>
+        <div style="font-family:-apple-system,sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:6px;">Contexto antes/depois</div>
+        <div class="autoridade-poder" style="margin-bottom:10px;">${a.contexto}</div>
+        <div style="font-family:-apple-system,sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:6px;">Por que é poderoso</div>
+        <div class="autoridade-poder">${a.poder}</div>
+        <div style="font-family:-apple-system,sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin:10px 0 6px;">Como usar</div>
+        <div class="uso-tags">${(a.usos||[]).map(u => `<span class="uso-tag">${u}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+
+  // PRINTS
+  document.getElementById('prints-container').innerHTML = (d.prints||[]).map((p,i) => `
+    <div class="print-card">
+      <div class="print-num">
+        <span>Print #${i+1}</span>
+        <button class="pill pill-teal" onclick="copyText(${JSON.stringify('"' + p.frase + '"\n— ' + p.nome + ' | ' + p.data + '\n\n' + p.legenda)})">Copiar print + legenda</button>
+      </div>
+      <div class="print-body">
+        <div class="print-frase">"${p.frase}"</div>
+        <div class="print-attr">— ${p.nome} | ${p.data}</div>
+        <div class="print-legenda-label">Legenda sugerida para Instagram</div>
+        <div class="print-legenda">${p.legenda}</div>
+      </div>
+    </div>`).join('');
+
+  setTimeout(() => { document.querySelectorAll('.bar-fill').forEach(el => { el.style.width = el.dataset.pct + '%'; }); }, 100);
+}
+
+// ======================== UTILS ========================
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).catch(() => {
+    const ta = document.createElement('textarea'); ta.value = text;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  });
+  showToast('Copiado!');
+}
+
+function copyPitch() {
+  const full = currentPitch.map(p => p.etapa.toUpperCase() + '\n' + p.texto).join('\n\n');
+  copyText(full);
+  showToast('Pitch completo copiado!');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function resetApp() {
+  document.getElementById('state-upload').style.display = 'block';
+  document.getElementById('state-results').style.display = 'none';
+  document.getElementById('nav-tabs').style.display = 'none';
+  document.getElementById('file-input').value = '';
+  _textoCarregado = '';
+  const btn = document.getElementById('btn-analisar');
+  if (btn) btn.style.display = 'none';
+  const dz = document.getElementById('drop-zone');
+  if (dz) {
+    dz.querySelector('.upload-title').textContent = 'Arraste o arquivo .txt ou clique para selecionar';
+    dz.querySelector('.upload-hint').textContent = 'Exportação do WhatsApp · qualquer conversa ou grupo';
+    dz.style.borderColor = '';
+  }
+  showTab('tab-overview');
+  document.querySelector('.nav-tab').classList.add('active');
+}
+
+// FILE HANDLERS
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+document.getElementById('file-input').addEventListener('change', e => handleFile(e.target.files[0]));
+</script>
+</body>
+</html>
