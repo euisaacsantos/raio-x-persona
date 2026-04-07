@@ -534,7 +534,7 @@ async function analyzeText(text) {
       headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 8000,
+        max_tokens: 8192,
         messages: [{
           role: "user",
           content: `Você é especialista em análise de persona, copywriting e lançamentos digitais. Analise esta conversa exportada do WhatsApp.
@@ -590,20 +590,30 @@ Quantidades: 5 transformações, 6 dores, 7 vitórias, 4 copies, 5 etapas pitch,
     clearInterval(iv);
 
     if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error(err.error?.message || 'Erro ' + resp.status);
+      const errText = await resp.text().catch(() => '');
+      let errMsg = 'Erro ' + resp.status;
+      try { const errJson = JSON.parse(errText); errMsg = errJson.error?.message || errMsg; } catch(_) {}
+      console.error('Resposta de erro (' + resp.status + '):', errText.slice(0, 500));
+      throw new Error(errMsg);
     }
 
     const data = await resp.json();
+    const stopReason = data.stop_reason;
     const raw = (data.content || []).map(b => b.text || '').join('');
-    const clean = raw.replace(/```json|```/g, '').trim();
+    const clean = raw.replace(/```json\n?|```/g, '').trim();
+
+    if (stopReason === 'max_tokens') {
+      console.error('Resposta truncada (max_tokens). Raw parcial:', raw.slice(-200));
+      throw new Error('Resposta truncada pelo limite de tokens. Tente com um arquivo menor.');
+    }
 
     let parsed;
     try { parsed = JSON.parse(clean); }
     catch(e) {
-      console.error('Parse error:', e);
-      console.error('Raw:', raw.slice(0, 300));
-      throw new Error('Resposta da IA inválida. Tente novamente — arquivos muito curtos podem causar isso.');
+      console.error('Parse error:', e.message);
+      console.error('Raw (primeiros 500 chars):', raw.slice(0, 500));
+      console.error('Raw (últimos 200 chars):', raw.slice(-200));
+      throw new Error('JSON inválido: ' + e.message.slice(0, 80));
     }
 
     renderResults(parsed);
